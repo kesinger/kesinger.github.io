@@ -1,0 +1,293 @@
+---
+layout: post
+title:  "Sawtooth Functions"
+date:   2020-02-10 18:42:00 -0500
+categories: math
+---
+A while back, Graeme Phillips put up a
+[blog post](https://graemephi.github.io/posts/triangle-dft/)
+asking "what happens
+if you replace all the sine waves in the fourier transform with
+triangle waves?"  It's a good post and you should go read it, but
+there were a couple aspects Graeme didn't address that have been
+sticking in my head.
+
+Let's start by defining the basic triangular sine wave:
+
+    def sbasis(x):
+        if (x<-1) or (x>1):
+            return 0
+        if x < 0:
+            return -sbasis(-x)
+        if x <= 0.5:
+            return 2*x
+        else:
+            return sbasis(1-x)
+
+I'm not going to plot this, but it's got roots at x=-1, 0, 1, a
+minimum at x=-0.5 and a maximum at x=0.5.  Just like $$\sin(\pi x)$$!
+
+Then it's easy to get triangular sine waves of all (positive integral)
+degrees:
+
+
+
+    def tsin(n, x):
+        rc = (x*n) % 2
+        if rc>1:
+            rc -= 2
+        return sbasis(rc)
+
+Triangular cosine works the same way:
+
+    def cbasis(x):
+        if (x<-1) or (x>1):
+            return 0
+        if x<0:
+            return cbasis(-x)
+        return 1-2*x
+
+    def tcos(n, x):
+        rc = (x*n) % 2
+        if rc>1:
+            rc -= 2
+        return cbasis(rc)
+
+And then the complex triangular exponential function in the obvious way:
+
+    def texp(n, x):
+        return tcos(n,x)+1j*tsin(n,x)
+
+These are not orthonormal under the usual inner product:
+
+$$IP(n,m) = (texp(n),texp(n)) = \int_{-1}^1 texp(n,x) conj(texp(n,x)) dx $$
+
+as $$IP(0,0) = 2$$, and $$IP(n,n) = 4/3$$ for $$n \ge 1$$. They're not
+even orthogonal, as for example $$IP(1,5) = 4/75$$.
+
+
+But here's where I started to get interested.  Looking at $$IP(n,p)$$ for $$n=1$$ and $$p\ge 1$$, one gets:
+
+
+| n  | p  | IP(1,p) |
+|---|---:|---:|
+|1|1|4/3|
+|1|2|0|
+|1|3|0|
+|1|4|0|
+|1|5|4/75|
+|1|6|0|
+|1|7|0|
+|1|8|0|
+|1|9|4/243|
+|1|10|0|
+|1|11|0|
+|1|12|0|
+|1|13|4/507|
+|1|14|0|
+
+And so on.  I certainly wasn't expecting that!   All the non-zero terms are
+of the form $$\frac{4}{3q}$$, and furthermore :
+
+| p | q |
+|---:|---:|
+|1|1|
+|5|25|
+|9|81|
+|13|169|
+|17|289|
+|21|441|
+|25|625|
+|29|841|
+|33|1089|
+
+Which is a nice friendly sequence of offense towards none.
+
+
+
+
+For n=2 it's a little messier:
+
+|n|  p|   q|
+|---|---:|---:|
+|2 | 2  | 1|
+|2 |10 | 25|
+|2 |18 | 81|
+|2 |26| 169|
+|2 |34| 289|
+|2| 42 |441|
+|2 |50| 625|
+
+Here the non-zero values are at a stride of 8,
+instead of 4, and we have q=(p/2)**2.
+
+Let's try n=3.
+
+|n|  p|    q|  $$\sqrt{q}$$|
+|---|---:|---:|---:|
+|3 | 3 |    1  |   1
+|3 | 7 |  441  |  21
+|3 |11 | 1089   | 33
+|3 |15 |   25  |   5
+|3 |19 | 3249  |  57
+|3 |23 | 4761  |  69
+|3 |27  |  81  |   9
+|3 |31  |8649  |  93
+
+What is up with that IP(3,15)? Going by the surrounding values,
+shouldn't it have sqrt(q)=45? And IP(3,3) doesn't match up either, nor does
+IP(3,27).  We're back on a stride of 4 however,
+
+
+
+It's looking as if when n divides p, we have $$q=(p/n)^2$$, and when it doesn't we have
+$$q=(pn)^2.$$
+
+This is consistent with the previous cases, sort of.
+When n=1, we're always in the $$q=(p/n)^2 = p^2$$ case!
+And when n=2, since p=8i+2 we're again seeing $$q=(p/n)^2$$.
+
+
+Going to n=4, the plot thickens;
+
+|n|   p |  q|
+|---|---:|---:|
+|4 |  4 |  1
+|4 | 20 | 25
+|4 | 36 | 81
+|4 | 52 |169
+|4 | 68 |289
+|4 | 84| 441
+|4 |100| 625
+
+Now we're on a stride of 16!
+
+Moving forward, n=5 does the same thing as n=3:
+
+|n|   p |  q|
+|---|---:|---:|
+|5 | 5 |    1
+|5 | 9 | 2025
+|5 |13 | 4225
+|5 |17 | 7225
+|5 |21 |11025
+|5 |25 |   25
+|5 |29 |21025
+|5 |33 |27225
+
+as does n=7.
+
+How about n=6?
+
+|n|   p |  q|
+|---|---:|---:|
+|6 |6 |1
+|6 |14 |441
+|6 |22 |1089
+|6 |30 |25
+|6 |38 |3249
+|6 |46 |4761
+|6 |54 |81
+|6 |62 |8649
+|6 |70 |11025
+|6 |78 |169
+|6 |86 |16641
+|6 |94 |19981
+|6 |102 |289
+
+This is the same as the n=3
+sequence except that we're on a stride of 8 instead of 4.
+
+In other words, n=6 is to n=3 as n=2 is to n=1
+(or n=4 to n=2).  That means n=12 should be the n=3
+sequence except on a stride of 16, and that's what we find:
+
+|n|p|q|
+|---|---:|---:|
+|12 |12| 1  |
+|12 |28 |441   |
+|12 |44 |1089  |
+|12 |60 |25    |
+|12 |76 |3249  |
+|12 |92 |4761   |
+|12 |108 |81    |
+|12 |124 |8649  |
+|12 |140 |11025 |
+|12 |156 |169   |
+|12 |172 |16641 |
+|12 |188 |19881 |
+|12 |204 |289  |
+
+Similarly, n=10 is the n=5 sequence on a stride of 8.
+
+How about n=9?
+
+|n|p|q|
+|---|---:|---:|
+|9|9|1
+|9|13|13689
+|9|17|23409
+|9|21|441
+|9|25|50625
+|9|29|68121
+|9|33|1089
+|9|37|110889
+|9|41|136161
+|9|45|25
+|9|49|194481
+|9|53|227529
+|9|57|3249
+
+
+We're on a stride of 4, and whenever gcd(9,p) > 1 we have the
+n=3 sequence appearing.  This suggests tha the "n divides p"
+rule above needs to be modified.
+
+But before that, and testing with n=15:
+
+|n|p|q|$$\gcd(n,p)$$|
+|---|---:|---:|---:|
+|15|15|1|15
+|15|19|81225|1
+|15|23|119025|1
+|15|27|2025|3
+|15|31|216225|1
+|15|35|441|5
+|15|39|4225|3
+|15|43|416025|1
+|15|47|497025|1
+|15|51|7225|3
+|15|55|1089|5
+|15|59|783225|1
+|15|63|11025|3
+|15|67|1010025|1
+|15|71|1134225|1
+|15|75|25|15
+|15|79|1404225|1
+|15|83|1550025|1
+|15|87|21025|3
+|15|91|1863225|1
+|15|95|3249|5
+
+
+Here we've got some trouble.  The rule needs to be modified again to
+$$q = \left(\frac{n}{\gcd(n,p)}\right)^2\left(\frac{p}{\gcd(n,p)}\right)^2$$.
+
+But the fun part is that this subsumes the two-part rule! (Since
+$$\gcd(n,p) = 1$$ when n doesn't divide p, this reduces to
+$$q=(np)^2$$.)
+
+
+
+
+In summary,  letting $$n=2^tm$$,
+
+$$
+IP(n,p) = \begin{cases}
+\left(\frac{n}{\gcd(n,p)}\right)^2\left(\frac{p}{\gcd(n,p)}\right)^2 & p \equiv n \mod 2^{t+2} \\
+0 & e.w.
+\end{cases}
+$$
+
+
+The end! No moral!
