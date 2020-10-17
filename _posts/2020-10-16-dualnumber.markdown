@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "The Dual Number Game"
-date:   2020-10-17 11:17:00 -0500
+date:   2020-10-17 11:17:00 EDT
 categories: math
 ---
 
@@ -75,7 +75,7 @@ And prove some coercions:
     lemma coe_injective : function.injective (coe : R → DUAL[R,jj]) :=
     λ x y h, congr_arg re h
     
-I think the ``instance`` is like an interface.  has_coe looks like:
+I think the ``instance`` is like an interface.  ``has_coe`` looks like:
 
     class has_coe (a : Sort u) (b : Sort v) := (coe : a → b)
 
@@ -118,8 +118,8 @@ that actually gets proved in that block is the additivity of association.
 I don't know if there's an instance for that which we could have asserted or 
 proven so as to avoid proving it here.
 
-Now for algebras.  I'll admit I'm getting out of my depth here, but let's 
-keep going.  
+Now for algebras.  I'll admit I'm getting out of my depth here lean-wise,
+but let's keep going.
 
 I have to prove some extensionality theorems that say two ``DUAL[R,jj]`` are 
 equal iff their component parts are equal:
@@ -141,7 +141,7 @@ equal iff their component parts are equal:
     end
     
 I think that if I hadn't abstracted over ``jj`` I wouldn't need this and
-could just have used the ``@[ext`` declaration in the original definition. 
+could just have used the ``@[ext]`` attribute in the original definition. 
 
 Now some more lemmas about moving from ``R`` to ``DUAL[R,jj]``.  Some of these
 only got proven with trial-and-error:
@@ -151,21 +151,23 @@ only got proven with trial-and-error:
 
     @[simp] lemma incl_add (r s : R) : ((r + s : R) : DUAL[R,jj]) = r + s := 
     begin
-      ext, refl, simp at *,
+      ext, refl, simp
     end
 
     @[simp, norm_cast] lemma coe_one : ((1 : R) : DUAL[R,jj]) = 1 := rfl
 
     @[simp] lemma incl_neg (r : R) : ((-r : R) : DUAL[R,jj]) = -r := 
     begin
-      ext, refl, simp at *
+      ext, refl, simp
     end
 
     @[simp] lemma incl_mul (jj r s : R) : ((r * s : R) : DUAL[R,jj]) = r * s := 
     begin
-      ext, simp at *, simp at *,
+      ext, simp, simp
     end
     
+Both ``simp``s are necessary in ``incl_mul``.
+
 I'm going to guess that ``incl_add``, ``incl_neg``, and ``incl_mul`` need
 the extra work because of the ``jj`` issue, as it's needed to instantiate
 this homomorphism (the ``→+*``):
