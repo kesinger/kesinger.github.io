@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "The Dual Number Game"
-date:   2020-02-10 18:42:00 -0500
+date:   2020-10-17 11:17:00 -0500
 categories: math
 ---
 
