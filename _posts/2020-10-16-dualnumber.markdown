@@ -45,19 +45,24 @@ This imports some basic functionality and defines the basic structure
 we'll be working with.  The ``notation`` is just for convenience, and 
 we'll be using it a lot. 
 
-Here's a couple of specializations we won't be using:
 
+**EDIT** : I'm no longer convinced this bit actually works.
 
-    def split_complex (R : Type*) [comm_ring R] := dual_algebra R (1)
-    def dual_number (R : Type*) [comm_ring R] := dual_algebra R (0)
-    def duals := dual_algebra ℝ (0)
-    def splits := dual_algebra ℝ (1)
+~~Here's a couple of specializations we won't be using:~~
 
-The latter two specialize over the reals, which is why R doesn't have to be 
+    -- please disregard for now.
+    --def split_complex (R : Type*) [comm_ring R] := dual_algebra R (1)
+    --def dual_number (R : Type*) [comm_ring R] := dual_algebra R (0)
+    --def duals := dual_algebra ℝ (0)
+    --def splits := dual_algebra ℝ (1)
+
+~~The latter two specialize over the reals, which is why R doesn't have to be 
 part of the signature.   This is just plain old partial application and it
-works like you'd think:
+works like you'd think:~~
 
-    def iduals := dual_number ℤ 
+    -- def iduals := dual_number ℤ --disregard
+
+
     
 Now for some proofs.  Go into the namespace and set up some common variables:
 
